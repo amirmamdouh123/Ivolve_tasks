@@ -1,49 +1,98 @@
-# Ansible Automation Project
+# Ansible Automation Platform Installation and Configuration
 
-## Overview
-This project consists of Ansible playbooks to automate user creation, web server installation, and public key authentication setup on remote hosts. The playbooks adapt based on the operating system distribution and utilize Ansible Vault for secure credential storage.
+## Objective
 
-## Files in the Repository
+Install and configure Ansible Automation Platform (AAP) on control nodes, create inventories of a managed host, and perform ad-hoc commands to check functionality.
 
-- **amir_secret.yml** - Ansible Vault-encrypted file containing sensitive credentials.
-- **ansible.cfg** - Ansible configuration file specifying default settings.
-- **hosts** - Inventory file listing remote hosts.
-- **index.html** - HTML file used as a sample web page.
-- **local_vars.yml** - Contains local variables used in the playbooks.
-- **my-playbook.yml** - Playbook to create a user and install a web server based on the OS distribution.
-- **new_template.txt** - Template file used in Ansible tasks.
-- **remote_send_publickey.yml** - Playbook to automate sending the authorized key using a stored password.
+---
 
-## Playbooks
+## **Prerequisites**
 
-### 1. `my-playbook.yml`
-This playbook performs the following tasks:
-- Creates a new user on the remote host.
-- Installs a web server (Apache or Nginx) based on the OS distribution.
-- Deploys a sample `index.html` page.
+- A Linux-based control node (RHEL 8/9 recommended).
+- Internet access or a local repository for package installations.
+- A managed host with SSH access enabled.
+- `sudo` privileges on the control node.
 
-#### Usage:
+---
+
+## **Step 1: Install Ansible Automation Platform**
+
+### **1.1 Update System Packages**
+
 ```bash
-ansible-playbook -i hosts my-playbook.yml --ask-vault-pass
+sudo dnf update -y
 ```
 
-### 2. `remote_send_publickey.yml`
-This playbook automates the process of sending the authorized SSH key to remote hosts using the stored password.
+### **1.2 Enable Required Repositories**
 
-#### Usage:
 ```bash
-ansible-playbook -i hosts remote_send_publickey.yml --ask-vault-pass
+sudo subscription-manager repos --enable ansible-automation-platform-2.4-for-rhel-9-x86_64-rpms
 ```
 
-## Prerequisites
-- Ansible installed on the control machine.
-- SSH access to remote hosts.
-- Ansible Vault configured for secure credential management.
-- Necessary permissions to execute tasks on remote hosts.
+### **1.3 Install Ansible Automation Platform**
 
-## Ansible Vault Handling
-To view or edit the encrypted credentials:
 ```bash
-ansible-vault view amir_secret.yml
-ansible-vault edit amir_secret.yml
+sudo dnf install ansible -y
+```
+
+### **1.4 Verify Installation**
+
+```bash
+ansible --version
+```
+
+---
+
+## **Step 2: Configure Ansible Inventory**
+
+### **2.1 Create an Inventory File**
+
+```bash
+sudo mkdir -p /etc/ansible && sudo touch /etc/ansible/hosts
+```
+
+### **2.2 Add Managed Hosts to Inventory**
+
+Edit `/etc/ansible/hosts`:
+
+```ini
+[web]
+192.168.1.10 ansible_user=devops ansible_ssh_private_key_file=~/.ssh/id_rsa
+
+[db]
+192.168.1.11 ansible_user=devops ansible_ssh_private_key_file=~/.ssh/id_rsa
+```
+
+### **2.3 Test Inventory**
+
+```bash
+ansible all -m ping
+```
+
+---
+
+## **Step 3: Perform Ad-Hoc Commands**
+
+### **3.1 Check Connectivity**
+
+```bash
+ansible all -m ping
+```
+
+### **3.2 Gather System Information**
+
+```bash
+ansible all -m setup
+```
+
+### **3.3 Install a Package on Remote Hosts**
+
+```bash
+ansible web -m yum -a "name=httpd state=present" --become
+```
+
+### **3.4 Start a Service**
+
+```bash
+ansible web -m service -a "name=httpd state=started" --become
 ```
