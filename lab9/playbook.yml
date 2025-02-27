@@ -1,0 +1,7 @@
+- name: run installation role
+  hosts: servers
+  become: yes
+  roles:
+    #  - jenkins_install
+    - docker_install
+    - OC_CLI_install

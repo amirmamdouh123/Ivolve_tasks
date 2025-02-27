@@ -1,0 +1,35 @@
+---
+# tasks file for OC_CLI_install
+
+- name: install GPG if missing
+  apt:
+    name: gpg
+    state: present 
+    update_cache: yes
+
+
+- name: install OC manually
+  get_url: 
+    url: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz
+    dest: /tmp/openshift-client-linux.tar.gz
+
+- name: unarchive 
+  unarchive: 
+     src: /tmp/openshift-client-linux.tar.gz
+     dest: /tmp/
+     remote_src: yes
+
+- name: move oc and kubectl to /usr/local/bin/
+  command: "mv /tmp/{{ item }} /usr/local/bin/{{ item  }}"
+  loop:
+    - kubectl
+    - oc
+
+- name: verify oc version
+  command: "oc version"
+  register: oc_version
+
+- name: oc version
+  debug:
+    msg: "{{ oc_version.stdout  }}"
+

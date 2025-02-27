@@ -1,0 +1,5 @@
+
+vars_package:
+  MYSQL_ROOT_PASSWORD: "root"
+  MYSQL_UERNAME: "amir"
+  MYSQL_PASSWORD: "amir"

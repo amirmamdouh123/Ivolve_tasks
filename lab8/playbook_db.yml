@@ -1,0 +1,64 @@
+
+- name: Install and Adjust DB on servers
+  hosts: servers
+  #remote_user: ubuntu
+  become: yes
+  vars_files:
+  - mysql_var_file.yml 
+  - db_secrets.yml
+
+  tasks:
+  - name: install db 
+    apt: 
+      name: mysql-server
+      state: present
+
+        #m4 7l 3mli 34an adding to .bashrc needs for reopen a new shell
+  - name: put needed env to the host instances
+    lineinfile:
+      path: ~/.bashrc
+      line: "export MYSQL_ROOT_PASSWORD=amir ; export MYSQL_USERNAME=amir ; export MYSQL_PASSWORD=amir"
+      create: yes
+ 
+  - name: change the default home directory of mysql user
+    user: 
+      name: mysql
+      home: /var/lib/mysql    
+    notify:
+    - restart mysql  
+
+
+  - name: copy .my.cnf to remote host
+    copy:
+      src: my.cnf
+      dest: ~/my.cnf 
+
+    #    xxrescue: 
+      - name: Install python
+        package: 
+          name: python3-pymysql 
+          state: present 
+        notify: 
+        - restart mysql
+
+  - name: create a db
+    mysql_db: 
+      name: ivovle 
+      state: present
+      login_unix_socket: /var/lib/mysql/mysql.sock
+
+  - name: create a user will full access
+    mysql_user:
+      name: '{{ user }}' 
+      password: '{{ passwd }}' 
+      priv: '*.*:ALL' 
+      state: present  
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+
+  handlers:
+  - name: restart mysql
+    service:
+         name: mysql
+         state: restarted
+
+

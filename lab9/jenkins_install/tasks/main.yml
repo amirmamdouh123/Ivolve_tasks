@@ -1,0 +1,57 @@
+---
+# tasks file for tools_installation_role
+
+#- name: install jenkins 
+#  jenkins_plugin:
+#    name: "build-pipeline-plugin"
+#  register: output
+
+- name: delete docker repo cause it make problem
+  file:
+    path: /etc/apt/sources.list.d/docker.list
+    state: absent
+
+
+
+- name: install java
+  package: 
+     name: openjdk-17-jdk
+     state: present
+
+- name: Install GPG if missing
+  apt:
+    name: gpg
+    state: present
+    update_cache: yes
+
+- name: download jenkins key then send it to remote host
+  get_url:
+    url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+    dest: /usr/share/keyrings/jenkins-keyring.asc
+    mode: '0644'
+
+- name: Add jenkins repo
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] http://pkg.jenkins.io/debian-stable binary/"
+    state: present
+    filename: jenkins
+
+- name: Update APT cache
+  apt:
+    update_cache: yes  
+
+- name: Install Jenkins
+  apt:
+    name: jenkins
+    state: present
+
+- name: enable and start jenkins
+  service:
+    name: jenkins
+    state: started
+    enabled: yes
+
+
+      #- name: jenkins output
+      #  debug:
+      #    msg: "{{ output  }}"
