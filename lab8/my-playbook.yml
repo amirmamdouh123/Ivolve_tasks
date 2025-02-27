@@ -1,0 +1,93 @@
+
+- name: create amir user with installing app on web server
+  hosts: servers
+  vars_files: 
+   - amir_secret.yml
+   - local_vars.yml 
+  become: yes
+  tasks:
+    - name: create new user
+      user:
+          name: amir
+          home: /home/amir
+          state: present 
+          shell: /bin/bash
+          groups: sudo
+          password: "{{ amir_credentials[ 'password' ] }}"
+      become: yes
+
+    - name: install httpd
+      package:
+         name: "{{ os_distribution[ansible_facts['distribution']] }}" 
+         state: present
+      become: yes
+
+    - name: start httpd
+      service:
+         name: "{{ os_distribution[ansible_facts['distribution']] }}"
+         state: started
+         enabled: yes
+      become: yes
+
+    - name: copy index.html to the server 
+      copy: 
+        src: index.html
+        dest: /var/www/html/index.html
+      become: yes
+
+    - name: install firewalld
+      package:
+        name: firewalld
+        state: present
+
+          #    - name: start and enable firewalld
+          #      service:
+          #        name: firewalld
+          #        state: started
+          #        enabled: #yes
+          #      become: yes
+          #    - name: open httpd in the firewall
+          #      firewalld:
+          #        service: "{{ os_distribution[ansible_facts['distribution']] }}"
+          #        permanent: yes
+          #        state: enabled
+          #      become: yes
+
+    - name: create directory
+      file:
+        name: /dir
+        state: directory
+        owner: root
+        group: root
+        mode: 766
+
+    - name: create three files inside
+      file:
+           name: "{{ item }}"
+           state: touch 
+           owner: ubuntu
+           group: root
+           mode: 766
+      loop:
+       - item1
+       - item2
+       - item3    
+
+    - name: append line in file
+      lineinfile:
+            path: '{{ item  }}'    
+            line: "in this line I want to tell that I love you"
+            state: present
+      loop:
+        - item1
+        - item2
+        - item3
+ 
+    - name: add the template info to remote host 
+      template: 
+           src: new_template.txt 
+           dest: ./my_data
+           owner: ubuntu
+           group: root  
+           mode: 700  
+               

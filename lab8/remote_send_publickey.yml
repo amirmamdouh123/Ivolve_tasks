@@ -1,0 +1,11 @@
+---
+
+- name: send public key to hosts
+  hosts: all
+  become: no
+  tasks:
+    - name: copy the public key  
+      authorized_key:
+        user: ubuntu
+        key: "{{ lookup( 'file','/home/amir-mamdouh/.ssh/id_rsa.pub') }}"
+        state: present

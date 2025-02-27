@@ -1,0 +1,6 @@
+
+hello brother
+OS distrbution is '{{ ansible_facts['distribution']  }}' 
+CPU Cores number is  '{{ ansible_facts['processor_cores']  }}'
+Free Memory right now is '{{ ansible_facts['memfree_mb']  }}'
+

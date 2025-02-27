@@ -1,7 +1,28 @@
-- name: run installation role
+
+- name: my-playbook
   hosts: servers
   become: yes
-  roles:
-    #  - jenkins_install
-    - docker_install
-    - OC_CLI_install
+  remote_user: ubuntu
+  vars_files:
+  - var_file.yml
+    #  - become_pass.yml
+    #  vars:
+    #    - Ubuntu: apache2
+  tasks:
+
+  - name: debug the distribution
+    debug:
+      msg: "the distribution is:  {{ ansible_facts['distribution'] }}"  
+
+  - name: install httpd
+    package:
+       name: "{{ package_name[ansible_facts['distribution']] }}"
+       state: present
+  
+
+  - name: enable httpd
+    service:
+         name: "{{ package_name[ansible_facts['distribution']]  }}"
+         state: started
+         enabled: true
+ 
