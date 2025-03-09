@@ -15,7 +15,7 @@ resource "tls_private_key" "my-private-key" {
 }
 
 resource "aws_key_pair" "ivolve_key_pair" {
-  key_name= "ivolve_key_pair"
+  key_name= "ivolve_key"
   public_key = tls_private_key.my-private-key.public_key_openssh
 }
 
