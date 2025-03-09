@@ -42,6 +42,3 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   subnet_ids= [aws_subnet.private_subnet.id , aws_subnet.private_subnet2.id     ] 
 }
 
-output "rds_endpoint" {
-  value = aws_db_instance.my_rds.endpoint
-}
